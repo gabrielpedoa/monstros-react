@@ -2,22 +2,32 @@
 import SearchBox from './components/search-box/search-box.component';
 import CardList from './components/card-list/card-list.component';
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
+import { getData } from './utils/data.utils';
 
+
+export type Monster = {
+  id: string;
+  name: string;
+  email: string;
+}
 
 const App = () => {
-  const [monsters, setMonsters] = useState([])
+  const [monsters, setMonsters] = useState<Monster[]>([])
   const [title, setTitle] = useState('')
-  const [searchField, setSearchField] = useState('') // [value, setValue]
-  const [filteredMonsters, setFilteredMonsters] = useState([])
+  const [searchField, setSearchField] = useState('')
+  const [filteredMonsters, setFilteredMonsters] = useState<Monster[]>([])
 
-  console.log('render')
 
   useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/users')
-      .then((response) => response.json())
-      .then((users) => setMonsters(users));
+    const fetchUsers = async () => {
+      const users = await getData<Monster[]>(
+        'https://jsonplaceholder.typicode.com/users'
+      )
+      setMonsters(users)
+    }
 
+    fetchUsers()
   }, [])
 
   useEffect(() => {
@@ -25,14 +35,14 @@ const App = () => {
       return monster.name.toLocaleLowerCase().includes(searchField)
     })
     setFilteredMonsters(newFilteredMonsters)
-  },[monsters, searchField])
-  
-  const onSearchChange = (event) => {
+  }, [monsters, searchField])
+
+  const onSearchChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const searchFieldString = event.target.value.toLocaleLowerCase()
     setSearchField(searchFieldString)
   }
 
-  const onTitleChange = (event) => {
+  const onTitleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const searchFieldString = event.target.value
     setTitle(searchFieldString)
   }
@@ -45,8 +55,8 @@ const App = () => {
         onChangeHandler={onSearchChange}
         placeholder={'search monster'}
         className={'monster-search-box'} />
-        <br />
-        <SearchBox
+      <br />
+      <SearchBox
         onChangeHandler={onTitleChange}
         placeholder={'set title'}
         className={'type-search-box'} />
